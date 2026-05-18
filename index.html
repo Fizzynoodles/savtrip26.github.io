@@ -64,7 +64,7 @@
   <small id="status"></small>
 
   <h2>Preview</h2>
-  <small>Preview runs in a sandbox. Scripts in shared HTML can run there, but some browser features remain restricted.</small>
+  <small>Preview runs in a sandbox (scripts allowed, same-origin disabled), so some browser features remain restricted.</small>
   <iframe id="preview" sandbox="allow-scripts"></iframe>
 
   <script>
@@ -75,12 +75,13 @@
     const shareLink = document.getElementById('shareLink');
     const preview = document.getElementById('preview');
     const status = document.getElementById('status');
+    const BASE64_CHUNK_SIZE = 0x8000;
+    const MAX_SAFE_URL_LENGTH = 8000;
 
     const bytesToBase64 = (bytes) => {
       let binary = '';
-      const chunkSize = 0x8000;
-      for (let i = 0; i < bytes.length; i += chunkSize) {
-        const chunk = bytes.subarray(i, i + chunkSize);
+      for (let i = 0; i < bytes.length; i += BASE64_CHUNK_SIZE) {
+        const chunk = bytes.subarray(i, i + BASE64_CHUNK_SIZE);
         binary += String.fromCharCode(...chunk);
       }
       return btoa(binary);
@@ -111,7 +112,7 @@
       const encoded = encodeHtml(html);
       const url = `${location.origin}${location.pathname}#${encoded}`;
       shareLink.value = url;
-      if (url.length > 8000) {
+      if (url.length > MAX_SAFE_URL_LENGTH) {
         setStatus('Link generated, but it may be too long for some browsers. Try shorter HTML.');
       } else {
         setStatus('Link generated.');
