@@ -64,7 +64,7 @@
   <small id="status"></small>
 
   <h2>Preview</h2>
-  <iframe id="preview" sandbox></iframe>
+  <iframe id="preview" sandbox="allow-scripts"></iframe>
 
   <script>
     const htmlInput = document.getElementById('htmlInput');
@@ -75,8 +75,27 @@
     const preview = document.getElementById('preview');
     const status = document.getElementById('status');
 
-    const encodeHtml = (html) => btoa(unescape(encodeURIComponent(html)));
-    const decodeHtml = (encoded) => decodeURIComponent(escape(atob(encoded)));
+    const bytesToBase64 = (bytes) => {
+      let binary = '';
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize);
+        binary += String.fromCharCode(...chunk);
+      }
+      return btoa(binary);
+    };
+    const base64ToBytes = (base64) => {
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    };
+    const textEncoder = new TextEncoder();
+    const textDecoder = new TextDecoder();
+    const encodeHtml = (html) => bytesToBase64(textEncoder.encode(html));
+    const decodeHtml = (encoded) => textDecoder.decode(base64ToBytes(encoded));
 
     const setStatus = (message) => {
       status.textContent = message;
@@ -125,8 +144,7 @@
         setStatus('Link copied to clipboard.');
       } catch {
         shareLink.select();
-        document.execCommand('copy');
-        setStatus('Link copied.');
+        setStatus('Clipboard permissions unavailable. Copy the selected link manually.');
       }
     });
 
