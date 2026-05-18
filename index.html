@@ -64,7 +64,7 @@
   <small id="status"></small>
 
   <h2>Preview</h2>
-  <small>Preview runs in a sandbox for safety, so some advanced browser features may be restricted.</small>
+  <small>Preview runs in a sandbox. Scripts in shared HTML can run there, but some browser features remain restricted.</small>
   <iframe id="preview" sandbox="allow-scripts"></iframe>
 
   <script>
@@ -111,7 +111,11 @@
       const encoded = encodeHtml(html);
       const url = `${location.origin}${location.pathname}#${encoded}`;
       shareLink.value = url;
-      setStatus('Link generated.');
+      if (url.length > 8000) {
+        setStatus('Link generated, but it may be too long for some browsers. Try shorter HTML.');
+      } else {
+        setStatus('Link generated.');
+      }
       updatePreview(html);
     };
 
@@ -140,7 +144,10 @@
 
     generateBtn.addEventListener('click', updateShareLink);
     copyBtn.addEventListener('click', async () => {
-      if (!shareLink.value) updateShareLink();
+      if (!shareLink.value) {
+        setStatus('Generate a link first.');
+        return;
+      }
       try {
         await navigator.clipboard.writeText(shareLink.value);
         setStatus('Link copied to clipboard.');
