@@ -75,13 +75,13 @@
     const shareLink = document.getElementById('shareLink');
     const preview = document.getElementById('preview');
     const status = document.getElementById('status');
-    const BASE64_CHUNK_SIZE = 0x8000;
-    const MAX_SAFE_URL_LENGTH = 8000;
+    const STRING_FROM_CHAR_CODE_CHUNK_SIZE = 32768;
+    const CONSERVATIVE_URL_LENGTH_LIMIT = 8000;
 
     const bytesToBase64 = (bytes) => {
       let binary = '';
-      for (let i = 0; i < bytes.length; i += BASE64_CHUNK_SIZE) {
-        const chunk = bytes.subarray(i, i + BASE64_CHUNK_SIZE);
+      for (let i = 0; i < bytes.length; i += STRING_FROM_CHAR_CODE_CHUNK_SIZE) {
+        const chunk = bytes.subarray(i, i + STRING_FROM_CHAR_CODE_CHUNK_SIZE);
         binary += String.fromCharCode(...chunk);
       }
       return btoa(binary);
@@ -112,7 +112,7 @@
       const encoded = encodeHtml(html);
       const url = `${location.origin}${location.pathname}#${encoded}`;
       shareLink.value = url;
-      if (url.length > MAX_SAFE_URL_LENGTH) {
+      if (url.length > CONSERVATIVE_URL_LENGTH_LIMIT) {
         setStatus('Link generated, but it may be too long for some browsers. Try shorter HTML.');
       } else {
         setStatus('Link generated.');
