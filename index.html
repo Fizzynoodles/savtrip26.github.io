@@ -64,6 +64,7 @@
   <small id="status"></small>
 
   <h2>Preview</h2>
+  <small>Preview runs in a sandbox for safety, so some advanced browser features may be restricted.</small>
   <iframe id="preview" sandbox="allow-scripts"></iframe>
 
   <script>
@@ -123,7 +124,8 @@
         shareLink.value = location.href;
         updatePreview(html);
         setStatus('Loaded shared HTML from URL.');
-      } catch {
+      } catch (error) {
+        console.error('Decode error:', error);
         setStatus('Could not decode the shared link.');
       }
     };
@@ -142,7 +144,8 @@
       try {
         await navigator.clipboard.writeText(shareLink.value);
         setStatus('Link copied to clipboard.');
-      } catch {
+      } catch (error) {
+        console.error('Clipboard error:', error);
         shareLink.select();
         setStatus('Clipboard permissions unavailable. Copy the selected link manually.');
       }
