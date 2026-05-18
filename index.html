@@ -64,8 +64,8 @@
   <small id="status"></small>
 
   <h2>Preview</h2>
-  <small>Preview runs in a sandbox (scripts allowed, same-origin disabled), so some browser features remain restricted.</small>
-  <iframe id="preview" sandbox="allow-scripts"></iframe>
+  <small>Preview runs in a strict sandbox (scripts and same-origin disabled) for safety.</small>
+  <iframe id="preview" sandbox></iframe>
 
   <script>
     const htmlInput = document.getElementById('htmlInput');
@@ -96,8 +96,8 @@
     };
     const textEncoder = new TextEncoder();
     const textDecoder = new TextDecoder();
-    const encodeHtml = (html) => bytesToBase64(textEncoder.encode(html));
-    const decodeHtml = (encoded) => textDecoder.decode(base64ToBytes(encoded));
+    const encodeHtml = (html) => encodeURIComponent(bytesToBase64(textEncoder.encode(html)));
+    const decodeHtml = (encoded) => textDecoder.decode(base64ToBytes(decodeURIComponent(encoded)));
 
     const setStatus = (message) => {
       status.textContent = message;
