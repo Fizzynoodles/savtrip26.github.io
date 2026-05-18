@@ -75,7 +75,9 @@
     const shareLink = document.getElementById('shareLink');
     const preview = document.getElementById('preview');
     const status = document.getElementById('status');
+    // Split bytes to avoid argument-limit errors with String.fromCharCode(...chunk).
     const BASE64_CHUNK_SIZE = 32768;
+    // Conservative URL-length threshold across browsers for reliable sharing.
     const CONSERVATIVE_URL_LENGTH_LIMIT = 8000;
 
     const bytesToBase64 = (bytes) => {
@@ -165,7 +167,7 @@
 
     loadFromHash();
     if (!htmlInput.value) {
-      htmlInput.value = '<h1>Hello friends!</h1>\n<p>This HTML came from a share link.</p>';
+      htmlInput.value = '<h1>Hello friends!</h1>\n<p>Paste or upload your own HTML, then generate a share link.</p>';
       updatePreview(htmlInput.value);
     }
   </script>
