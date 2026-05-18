@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quick HTML Share</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 1rem;
+      max-width: 960px;
+      margin-inline: auto;
+    }
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-block: 0.75rem;
+      align-items: center;
+    }
+    input[type="text"] {
+      flex: 1 1 320px;
+      min-width: 0;
+      padding: 0.45rem;
+    }
+    button, input[type="file"] {
+      padding: 0.45rem 0.65rem;
+    }
+    iframe {
+      width: 100%;
+      height: 320px;
+      border: 1px solid #8884;
+      background: white;
+    }
+    small {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Quick HTML Share</h1>
+  <p>Paste HTML (or open a local <code>.html</code> file), then generate a shareable link.</p>
+
+  <textarea id="htmlInput" placeholder="&lt;h1&gt;Hello friends!&lt;/h1&gt;"></textarea>
+  <div class="row">
+    <input id="fileInput" type="file" accept=".html,text/html">
+    <button id="generateBtn" type="button">Generate link</button>
+    <button id="copyBtn" type="button">Copy link</button>
+  </div>
+  <div class="row">
+    <input id="shareLink" type="text" readonly placeholder="Share link appears here">
+  </div>
+  <small id="status"></small>
+
+  <h2>Preview</h2>
+  <iframe id="preview" sandbox></iframe>
+
+  <script>
+    const htmlInput = document.getElementById('htmlInput');
+    const fileInput = document.getElementById('fileInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const shareLink = document.getElementById('shareLink');
+    const preview = document.getElementById('preview');
+    const status = document.getElementById('status');
+
+    const encodeHtml = (html) => btoa(unescape(encodeURIComponent(html)));
+    const decodeHtml = (encoded) => decodeURIComponent(escape(atob(encoded)));
+
+    const setStatus = (message) => {
+      status.textContent = message;
+    };
+
+    const updatePreview = (html) => {
+      preview.srcdoc = html;
+    };
+
+    const updateShareLink = () => {
+      const html = htmlInput.value;
+      const encoded = encodeHtml(html);
+      const url = `${location.origin}${location.pathname}#${encoded}`;
+      shareLink.value = url;
+      setStatus('Link generated.');
+      updatePreview(html);
+    };
+
+    const loadFromHash = () => {
+      const encoded = location.hash.slice(1);
+      if (!encoded) return;
+      try {
+        const html = decodeHtml(encoded);
+        htmlInput.value = html;
+        shareLink.value = location.href;
+        updatePreview(html);
+        setStatus('Loaded shared HTML from URL.');
+      } catch {
+        setStatus('Could not decode the shared link.');
+      }
+    };
+
+    fileInput.addEventListener('change', async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      htmlInput.value = await file.text();
+      updatePreview(htmlInput.value);
+      setStatus(`Loaded ${file.name}.`);
+    });
+
+    generateBtn.addEventListener('click', updateShareLink);
+    copyBtn.addEventListener('click', async () => {
+      if (!shareLink.value) updateShareLink();
+      try {
+        await navigator.clipboard.writeText(shareLink.value);
+        setStatus('Link copied to clipboard.');
+      } catch {
+        shareLink.select();
+        document.execCommand('copy');
+        setStatus('Link copied.');
+      }
+    });
+
+    htmlInput.addEventListener('input', () => {
+      updatePreview(htmlInput.value);
+    });
+
+    loadFromHash();
+    if (!htmlInput.value) {
+      htmlInput.value = '<h1>Hello friends!</h1>\n<p>This HTML came from a share link.</p>';
+      updatePreview(htmlInput.value);
+    }
+  </script>
+</body>
+</html>
